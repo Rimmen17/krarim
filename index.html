@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="da">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Krarim</title>
+  <meta name="theme-color" content="#fbeef2">
+  <link rel="icon" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Nunito:wght@400;600;700&display=swap">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body data-wall="flowers">
+  <p id="status" class="status" role="status" hidden></p>
+
+  <section id="login-view" class="login" hidden>
+    <h1 class="logo">Krarim</h1>
+    <p class="lede">Jeres fælles kalender, to-do og indkøbsliste.</p>
+    <p id="demo-banner" class="demo" hidden>Demo uden database: log ind som Nicolai eller Sisse med adgangskoden demo123.</p>
+    <form id="login-form" class="card" autocomplete="on">
+      <label>Navn
+        <input id="login-name" name="username" type="text" autocomplete="username" autocapitalize="words" required maxlength="40">
+      </label>
+      <label>Adgangskode
+        <input id="login-password" name="password" type="password" autocomplete="current-password" required maxlength="72">
+      </label>
+      <p id="login-error" class="error" role="alert" hidden></p>
+      <button type="submit" class="primary">Log ind</button>
+    </form>
+  </section>
+
+  <div id="main-view" hidden>
+    <header class="top">
+      <h1 class="logo">Krarim</h1>
+      <div class="who">
+        <span id="user-name"></span>
+        <button type="button" id="open-wall" class="link">Baggrund</button>
+        <button type="button" id="logout" class="link">Log ud</button>
+      </div>
+    </header>
+
+    <main>
+      <section id="page-calendar" class="page" aria-labelledby="tab-calendar">
+        <div class="toolbar">
+          <div class="tabs" role="tablist">
+            <button type="button" role="tab" id="cal-list" aria-selected="true">Liste</button>
+            <button type="button" role="tab" id="cal-month" aria-selected="false">Måned</button>
+          </div>
+          <button type="button" id="new-event" class="primary">Ny aftale</button>
+        </div>
+        <div id="month" class="card" hidden></div>
+        <div id="agenda"></div>
+      </section>
+
+      <section id="page-todo" class="page" aria-labelledby="tab-todo" hidden>
+        <h2 class="page-title">To-do</h2>
+        <form id="todo-add" class="quick card">
+          <input name="text" type="text" placeholder="Ny opgave" aria-label="Ny opgave" maxlength="200" autocomplete="off" required>
+          <button type="submit" class="primary">Tilføj</button>
+        </form>
+        <div id="todo-filter" class="chips" role="group" aria-label="Hvilken liste"></div>
+        <p id="todo-hint" class="hint" hidden>Din egen liste er privat: kun du kan se den.</p>
+        <div id="todo-items"></div>
+      </section>
+
+      <section id="page-shopping" class="page" aria-labelledby="tab-shopping" hidden>
+        <h2 class="page-title">Indkøb</h2>
+        <form id="shop-add" class="quick card">
+          <input name="text" type="text" placeholder="Fx mælk, 2 avocadoer" aria-label="Tilføj vare" maxlength="200" autocomplete="off" required>
+          <button type="submit" class="primary">Tilføj</button>
+        </form>
+        <div id="shop-items"></div>
+      </section>
+
+      <section id="page-lists" class="page" aria-labelledby="tab-lists" hidden>
+        <div id="lists-overview">
+          <div class="page-head">
+            <h2 class="page-title">Lister</h2>
+            <button type="button" id="new-list" class="primary">Ny liste</button>
+          </div>
+          <div id="lists-grid"></div>
+        </div>
+        <div id="list-detail" hidden>
+          <div class="page-head">
+            <button type="button" id="list-back" class="link">‹ Alle lister</button>
+            <div class="list-tools">
+              <button type="button" id="list-rename" class="link">Omdøb</button>
+              <button type="button" id="list-delete" class="link danger">Slet liste</button>
+            </div>
+          </div>
+          <h2 id="list-title" class="page-title"></h2>
+          <form id="list-add" class="quick card">
+            <input name="text" type="text" placeholder="Tilføj til listen" aria-label="Tilføj til listen" maxlength="200" autocomplete="off" required>
+            <button type="submit" class="primary">Tilføj</button>
+          </form>
+          <div id="list-items"></div>
+        </div>
+      </section>
+    </main>
+
+    <nav class="tabbar" aria-label="Sider">
+      <button type="button" id="tab-calendar" data-page="calendar" aria-current="page">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="4"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>
+        <span>Kalender</span>
+      </button>
+      <button type="button" id="tab-todo" data-page="todo">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="5"/><path d="M8.5 12.5l2.5 2.5 4.5-5"/></svg>
+        <span>To-do</span><b class="badge" id="badge-todo" hidden></b>
+      </button>
+      <button type="button" id="tab-shopping" data-page="shopping">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h2l2 10h9l2-7H7"/><circle cx="9.5" cy="19.5" r="1.2"/><circle cx="16.5" cy="19.5" r="1.2"/></svg>
+        <span>Indkøb</span><b class="badge" id="badge-shopping" hidden></b>
+      </button>
+      <button type="button" id="tab-lists" data-page="lists">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-7-4.3-7-9.5A3.8 3.8 0 0 1 12 8a3.8 3.8 0 0 1 7 2.5C19 15.7 12 20 12 20z"/></svg>
+        <span>Lister</span>
+      </button>
+    </nav>
+  </div>
+
+  <dialog id="event-dialog">
+    <form id="event-form" method="dialog">
+      <h2 id="event-dialog-title">Ny aftale</h2>
+      <label>Titel
+        <input name="title" type="text" required maxlength="80">
+      </label>
+      <label>Dato
+        <input name="date" type="date" required>
+      </label>
+      <label class="check">
+        <input name="allDay" type="checkbox">
+        Hele dagen
+      </label>
+      <div class="row" id="event-times">
+        <label>Start
+          <input name="start" type="time" required>
+        </label>
+        <label>Slut (valgfri)
+          <input name="end" type="time">
+        </label>
+      </div>
+      <label>Hvem
+        <select name="who"></select>
+      </label>
+      <label>Sted (valgfri)
+        <input name="location" type="text" maxlength="80">
+      </label>
+      <label>Note (valgfri)
+        <textarea name="description" rows="3" maxlength="500"></textarea>
+      </label>
+      <p id="event-error" class="error" role="alert" hidden></p>
+      <div class="actions">
+        <button type="button" id="event-cancel">Annuller</button>
+        <button type="submit" class="primary">Gem</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="item-dialog">
+    <form id="item-form" method="dialog">
+      <h2>Rediger opgave</h2>
+      <label>Opgave
+        <input name="text" type="text" required maxlength="200">
+      </label>
+      <label id="item-who">Hvem
+        <select name="assignee"></select>
+      </label>
+      <label>Senest (valgfri)
+        <input name="due" type="date">
+      </label>
+      <p id="item-error" class="error" role="alert" hidden></p>
+      <div class="actions spread">
+        <button type="button" id="item-delete" class="link danger">Slet</button>
+        <span>
+          <button type="button" id="item-cancel">Annuller</button>
+          <button type="submit" class="primary">Gem</button>
+        </span>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="list-dialog">
+    <form id="list-form" method="dialog">
+      <h2 id="list-dialog-title">Ny liste</h2>
+      <label>Navn
+        <input name="name" type="text" required maxlength="40" placeholder="Fx gaveidéer eller film vi skal se">
+      </label>
+      <p id="list-error" class="error" role="alert" hidden></p>
+      <div class="actions">
+        <button type="button" id="list-cancel">Annuller</button>
+        <button type="submit" class="primary">Gem</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="wall-dialog">
+    <h2>Vælg baggrund</h2>
+    <p class="hint">Gemmes kun på denne telefon.</p>
+    <div id="wall-choices" class="walls"></div>
+    <div class="actions">
+      <button type="button" id="wall-close" class="primary">Færdig</button>
+    </div>
+  </dialog>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
